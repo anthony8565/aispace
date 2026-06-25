@@ -1,25 +1,28 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+export const runtime = 'nodejs'
 
-export async function POST(request: Request) {
-  const { topic, type } = await request.json()
+export async function POST(req: NextRequest) {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
+
+  const { prompt, type } = await req.json()
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
-        content: 'You are an expert content creator. Create engaging content based on the topic and type provided.',
+        content: 'You are a helpful content writer. Generate high quality content based on the user request.',
       },
       {
         role: 'user',
-        content: `Create a ${type} about: ${topic}`,
+        content: `Write ${type}: ${prompt}`,
       },
     ],
+    max_tokens: 1000,
   })
 
   const content = completion.choices[0].message.content
