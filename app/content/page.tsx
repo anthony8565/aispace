@@ -1,109 +1,94 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+
+const contentTypes = [
+  'Blog Post',
+  'Twitter Thread',
+  'LinkedIn Post',
+  'Email Newsletter',
+  'Product Description',
+]
 
 export default function ContentPage() {
-  const [topic, setTopic] = useState('');
-  const [contentType, setContentType] = useState('blog post');
-  const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [prompt, setPrompt] = useState('')
+  const [type, setType] = useState('Blog Post')
+  const [result, setResult] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
-    if (!topic) return;
-    setLoading(true);
-    setResult('');
+    if (!prompt) return
+    setLoading(true)
+    setResult('')
 
-    const response = await fetch('/api/generate', {
+    const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, contentType }),
-    });
+      body: JSON.stringify({ prompt, type }),
+    })
 
-    const data = await response.json();
-    setResult(data.content);
-    setLoading(false);
-  };
+    const data = await res.json()
+    setResult(data.content)
+    setLoading(false)
+  }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#a855f7', marginBottom: '30px' }}>
+    <main style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
+      <h1 style={{ fontSize: '2rem', marginBottom: '24px' }}>
         ✍️ Content Generator
       </h1>
 
-      <input
-        type="text"
-        placeholder="Enter your topic..."
-        value={topic}
-        onChange={(e) => setTopic(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '14px',
-          borderRadius: '12px',
-          border: '1px solid #a855f7',
-          background: '#1a1a2e',
-          color: 'white',
-          fontSize: '1rem',
-          marginBottom: '16px',
-          boxSizing: 'border-box',
-        }}
-      />
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+          Content Type
+        </label>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          style={{ width: '100%', padding: '10px', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' }}
+        >
+          {contentTypes.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
 
-      <select
-        value={contentType}
-        onChange={(e) => setContentType(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '14px',
-          borderRadius: '12px',
-          border: '1px solid #a855f7',
-          background: '#1a1a2e',
-          color: 'white',
-          fontSize: '1rem',
-          marginBottom: '16px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <option value="blog post">Blog Post</option>
-        <option value="twitter thread">Twitter Thread</option>
-        <option value="linkedin post">LinkedIn Post</option>
-        <option value="email newsletter">Email Newsletter</option>
-        <option value="product description">Product Description</option>
-      </select>
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+          What do you want to write about?
+        </label>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="e.g. The benefits of drinking more water every day"
+          rows={4}
+          style={{ width: '100%', padding: '10px', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' }}
+        />
+      </div>
 
       <button
         onClick={handleGenerate}
-        disabled={loading}
+        disabled={loading || !prompt}
         style={{
-          width: '100%',
-          padding: '14px',
-          borderRadius: '12px',
-          background: loading ? '#6b21a8' : '#a855f7',
-          color: 'white',
+          backgroundColor: '#000',
+          color: '#fff',
+          padding: '12px 24px',
           fontSize: '1rem',
-          fontWeight: 'bold',
+          borderRadius: '6px',
           border: 'none',
           cursor: loading ? 'not-allowed' : 'pointer',
-          marginBottom: '30px',
+          opacity: loading || !prompt ? 0.6 : 1,
         }}
       >
         {loading ? 'Generating...' : 'Generate Content'}
       </button>
 
       {result && (
-        <div
-          style={{
-            background: '#1a1a2e',
-            border: '1px solid #a855f7',
-            borderRadius: '12px',
-            padding: '24px',
-            color: '#e2e8f0',
-            lineHeight: '1.8',
-          }}
-        >
+        <div style={{ marginTop: '40px', padding: '24px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #eee' }}>
           <ReactMarkdown>{result}</ReactMarkdown>
         </div>
       )}
-    </div>
-  );
+    </main>
+  )
 }
